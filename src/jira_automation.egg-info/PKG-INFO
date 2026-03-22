@@ -1,0 +1,110 @@
+Metadata-Version: 2.4
+Name: jira-automation
+Version: 0.1.0
+Summary: API-first Jira automation tool for human and AI agent workflows.
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: PyYAML>=6.0.1
+Requires-Dist: python-dotenv>=1.0.1
+Requires-Dist: requests>=2.32.3
+
+# Jira Automation
+
+API-first Jira automation tool for human operators and AI agents. The project provides a stable Python CLI for pulling tickets, filling planning fields, and transitioning issues through Jira workflows.
+
+## Implementation Plan
+
+1. Build a shared Jira client with `.env`-based authentication and YAML-based field and transition mappings.
+2. Expose a stable CLI with machine-readable JSON output for `healthcheck`, `pull`, `get`, `fill`, and `transition`.
+3. Document the exact setup and usage contract in repo-local docs so AI agents can use the tool without guessing.
+4. Keep Jira REST API as the execution layer; MCP and other agents should call this tool rather than writing to Jira directly.
+5. Extend later with batch sync, richer planning payloads, CI hooks, and optional MCP wrappers.
+
+## Setup
+
+1. Create a virtual environment and install the package:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e .
+```
+
+2. Copy the example files:
+
+```bash
+cp .env.example .env
+cp config.yaml.example config.yaml
+```
+
+3. Fill in `.env` with your Jira Cloud URL, account email, and API token.
+
+4. Update `config.yaml` with your actual Jira custom field IDs and transition names.
+
+5. Run the health check:
+
+```bash
+jira-tool healthcheck --json
+```
+
+## Usage
+
+Pull issues:
+
+```bash
+jira-tool pull --query planning_queue --json
+jira-tool pull --jql 'project = ABC AND sprint in openSprints()' --json
+```
+
+Fetch one issue:
+
+```bash
+jira-tool get ABC-123 --json
+```
+
+Fill planning fields:
+
+```bash
+jira-tool fill ABC-123 \
+  --ac "User can save a draft" \
+  --business "Reduce loss of work during interruptions" \
+  --scope "Draft save and resume flow" \
+  --qa-notes "Verify save, reload, and draft overwrite behavior" \
+  --json
+```
+
+Or from a JSON file:
+
+```json
+{
+  "acceptance_criteria": "User can save a draft",
+  "business": "Reduce loss of work during interruptions",
+  "scope": "Draft save and resume flow",
+  "qa_notes": "Verify save, reload, and draft overwrite behavior"
+}
+```
+
+```bash
+jira-tool fill ABC-123 --file planning.json --json
+```
+
+Transition an issue:
+
+```bash
+jira-tool transition ABC-123 --to in_review --json
+```
+
+Dry run:
+
+```bash
+jira-tool fill ABC-123 --file planning.json --dry-run --json
+jira-tool transition ABC-123 --to done --dry-run --json
+```
+
+## Notes
+
+- API tokens are configured through `.env` and must be rotated manually.
+- AI agents should use the CLI with `--json`.
+- Jira custom field IDs and workflow transition names are environment-specific and belong in `config.yaml`.
+
+See [AGENTS.md](/Users/viethoang/Workspace/jira-automation/AGENTS.md) and [docs/contracts.md](/Users/viethoang/Workspace/jira-automation/docs/contracts.md) for the agent-facing operating contract.
