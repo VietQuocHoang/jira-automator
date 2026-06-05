@@ -1,2 +1,0 @@
-[console_scripts]
-jira-tool = jira_tool.cli:main
