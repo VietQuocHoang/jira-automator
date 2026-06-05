@@ -1,0 +1,13 @@
+description = "Apply planning fields to a Jira issue. Usage: /jira-fill <KEY> --file <plan.json> | --ac '...' --business '...' --scope '...' --qa-notes '...' [--dry-run]"
+
+prompt = """
+Run the following command and display the result:
+
+```
+jira-tool fill <args> --json
+```
+
+Parse the JSON response. If `status` is `"ok"`, confirm the updated fields and whether it was a dry run. If `status` is `"error"`, report the `error_code` and `message`.
+
+If no arguments were provided, ask the user for the issue key and planning content before running. Suggest `--dry-run` first when the user has not explicitly confirmed the write.
+"""

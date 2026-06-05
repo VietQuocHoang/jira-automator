@@ -1,0 +1,13 @@
+description = "Pull Jira issues by named query or JQL. Usage: /jira-pull --query <name> | --jql '<JQL>' [--profile <name>]"
+
+prompt = """
+Run the following command and display the result:
+
+```
+jira-tool pull <args> --json
+```
+
+Parse the JSON response. If `status` is `"ok"`, display the issues as a numbered list showing key, summary, status, and assignee, along with the resolved JQL and total count. If `status` is `"error"`, report the `error_code` and `message`.
+
+Named queries come from `config.yaml`. If no arguments were provided, ask the user which query or JQL to use before running the command.
+"""

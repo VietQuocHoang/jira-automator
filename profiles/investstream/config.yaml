@@ -1,0 +1,24 @@
+projects:
+  default: SUPERCHAT
+
+fields:
+  acceptance_criteria: customfield_10041
+  business: customfield_10042
+  scope: customfield_10043
+  qa_notes: customfield_10044
+
+transitions:
+  planned: Planned
+  in_progress: In Progress
+  in_review: Ready for Review
+  testing: QA Testing
+  done: Done
+
+queries:
+  planning_queue: 'project = SUPERCHAT AND status = "To Do" ORDER BY priority DESC'
+  sprint_open: 'project = SUPERCHAT AND sprint in openSprints() ORDER BY rank ASC'
+
+behavior:
+  fail_if_transition_missing: true
+  update_fields_before_transition: true
+  dry_run_default: false

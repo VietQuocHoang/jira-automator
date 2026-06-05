@@ -1,0 +1,11 @@
+description = "Fetch a single Jira issue by key. Usage: /jira-get <ISSUE-KEY> [--profile <name>]"
+
+prompt = """
+Run the following command and display the result:
+
+```
+jira-tool get <args> --json
+```
+
+Parse the JSON response. If `status` is `"ok"`, display the issue details (key, summary, status, assignee, and any planning fields). If `status` is `"error"`, report the `error_code` and `message`.
+"""

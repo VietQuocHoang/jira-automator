@@ -1,0 +1,13 @@
+description = "Batch-apply a planning JSON file across multiple Jira issues. Usage: /jira-sync-plan --file <batch.json> [--dry-run] [--profile <name>]"
+
+prompt = """
+Run the following command and display the result:
+
+```
+jira-tool sync-plan <args> --json
+```
+
+Parse the JSON response. If `status` is `"ok"`, summarise which issues were updated and any that were skipped. If `status` is `"error"`, report the `error_code` and `message`.
+
+If no file is provided, ask the user to supply one. Suggest `--dry-run` first when the user has not explicitly confirmed the write.
+"""

@@ -1,0 +1,13 @@
+description = "Transition a Jira issue to a new workflow state. Usage: /jira-transition <KEY> --to <state-key> [--dry-run] [--profile <name>]"
+
+prompt = """
+Run the following command and display the result:
+
+```
+jira-tool transition <args> --json
+```
+
+Parse the JSON response. If `status` is `"ok"`, confirm the issue key, resolved transition name, and whether it was a dry run. If `status` is `"error"`, report the `error_code` and `message`.
+
+State keys come from `config.yaml` (e.g. `in_review`, `done`). Never use raw Jira transition IDs. If `--to` is missing, ask the user which state before running. Suggest `--dry-run` first when the user has not explicitly confirmed the write.
+"""

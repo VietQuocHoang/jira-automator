@@ -2,6 +2,8 @@
 
 This project is the approved interface for Jira reads and writes in this repository. AI agents such as Claude, Codex, Copilot, and MCP wrappers should use this tool rather than calling Jira directly when the tool supports the needed action.
 
+> **Claude Code users:** see [CLAUDE.md](CLAUDE.md) for slash command shortcuts (`/jira-get`, `/jira-pull`, `/jira-fill`, `/jira-transition`, `/jira-sync-plan`).
+
 Single-profile mode is supported with root `.env` and `config.yaml`. Multi-profile mode is optional and uses `profiles/<name>/`.
 
 ## Setup
@@ -117,4 +119,4 @@ Agents should check `status == "ok"` before assuming a write or transition succe
 - If root `.env` and `config.yaml` exist, they are used by default.
 - If root config is absent and exactly one profile exists, that profile is used automatically.
 
-For command and response contracts, see [docs/contracts.md](/Users/viethoang/Workspace/jira-automation/docs/contracts.md).
+For command and response contracts, see [docs/contracts.md](docs/contracts.md).

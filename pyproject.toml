@@ -12,10 +12,12 @@ dependencies = [
   "PyYAML>=6.0.1",
   "python-dotenv>=1.0.1",
   "requests>=2.32.3",
+  "mcp>=1.0",
 ]
 
 [project.scripts]
 jira-tool = "jira_tool.cli:main"
+jira-tool-mcp = "jira_tool.mcp_server:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
