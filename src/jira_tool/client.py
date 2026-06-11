@@ -71,7 +71,12 @@ class JiraClient:
         message = response.text
         try:
             details = response.json()
-            message = details.get("errorMessages", [message])[0]
+            error_messages = details.get("errorMessages") or []
+            errors = details.get("errors") or {}
+            if error_messages:
+                message = error_messages[0]
+            elif errors:
+                message = "; ".join(f"{k}: {v}" for k, v in errors.items())
         except ValueError:
             details = None
 
