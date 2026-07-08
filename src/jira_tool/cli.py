@@ -63,6 +63,19 @@ def build_parser() -> argparse.ArgumentParser:
     sync_plan.add_argument("--dry-run", action="store_true")
     sync_plan.add_argument("--json", action="store_true", help="Emit JSON output")
 
+    comment = subparsers.add_parser("comment", help="Post a comment on a Jira issue")
+    comment.add_argument("issue_key")
+    body_group = comment.add_mutually_exclusive_group(required=True)
+    body_group.add_argument("--body", dest="body_text", metavar="TEXT",
+                            help="Inline markdown text to post as comment")
+    body_group.add_argument("--file", dest="markdown_file", metavar="FILE",
+                            help="Markdown file whose content becomes the comment body")
+    body_group.add_argument("--adf-file", dest="adf_file", metavar="FILE",
+                            help="Pre-built ADF JSON file to post verbatim")
+    comment.add_argument("--dry-run", action="store_true",
+                         help="Parse and validate without posting")
+    comment.add_argument("--json", action="store_true", help="Emit JSON output")
+
     return parser
 
 
@@ -112,6 +125,14 @@ def _dispatch(args: argparse.Namespace) -> dict[str, Any]:
         return service.transition(args.issue_key, args.target_state, dry_run=args.dry_run)
     if args.command == "sync-plan":
         return service.sync_plan(args.file, dry_run=args.dry_run)
+    if args.command == "comment":
+        return service.comment(
+            args.issue_key,
+            body_text=args.body_text,
+            markdown_file=args.markdown_file,
+            adf_file=args.adf_file,
+            dry_run=args.dry_run,
+        )
     raise ValueError(f"Unsupported command: {args.command}")
 
 

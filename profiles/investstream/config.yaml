@@ -9,8 +9,12 @@ fields:
 
 transitions:
   planned: Planned
-  in_progress: In Progress
-  in_review: Ready for Review
+  # Backlog → Selected for Development (first step out of Backlog)
+  select_for_dev: Ready for work
+  # Selected for Development → In Progress
+  in_progress: Selected to dev
+  # In Progress → Code Review
+  in_review: In progress to code review
   testing: QA Testing
   done: Done
 

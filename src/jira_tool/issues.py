@@ -18,7 +18,7 @@ def search_issues(
     }
     if fields:
         payload["fields"] = fields
-    return client.post("/rest/api/3/search", json_body=payload)
+    return client.post("/rest/api/3/search/jql", json_body=payload)
 
 
 def get_issue(

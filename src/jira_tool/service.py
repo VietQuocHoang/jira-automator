@@ -5,6 +5,7 @@ from typing import Any
 import json
 
 from jira_tool.client import JiraAPIError, JiraClient
+from jira_tool.comments import load_comment_body, post_comment
 from jira_tool.fields import build_issue_fields_payload
 from jira_tool.issues import get_issue, search_issues, update_issue
 from jira_tool.models import AppConfig
@@ -142,6 +143,31 @@ class JiraService:
                 }
             )
         return {"status": "ok", "results": results, "dry_run": dry_run}
+
+    def comment(
+        self,
+        issue_key: str,
+        *,
+        body_text: str | None = None,
+        markdown_file: str | None = None,
+        adf_file: str | None = None,
+        dry_run: bool = False,
+    ) -> dict[str, Any]:
+        body = load_comment_body(text=body_text, markdown_file=markdown_file, adf_file=adf_file)
+        if not dry_run:
+            result = post_comment(self.client, issue_key, body)
+            comment_id = result.get("id")
+            comment_url = result.get("self", "")
+        else:
+            comment_id = None
+            comment_url = ""
+        return {
+            "status": "ok",
+            "issue_key": issue_key,
+            "comment_id": comment_id,
+            "comment_url": comment_url,
+            "dry_run": dry_run,
+        }
 
     def _load_json_file(self, path: str) -> dict[str, Any]:
         with Path(path).open("r", encoding="utf-8") as handle:
