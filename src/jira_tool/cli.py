@@ -48,9 +48,36 @@ def build_parser() -> argparse.ArgumentParser:
     fill.add_argument("--business")
     fill.add_argument("--scope")
     fill.add_argument("--qa-notes", dest="qa_notes")
+    fill.add_argument("--build-number", dest="build_number", type=float,
+                      help="Numeric build/MR/PR number")
     fill.add_argument("--file", help="JSON file with planning payload")
     fill.add_argument("--dry-run", action="store_true")
     fill.add_argument("--json", action="store_true", help="Emit JSON output")
+
+    create = subparsers.add_parser("create", help="Create a new Jira issue")
+    create.add_argument("--summary", required=True, help="Issue summary/title")
+    create.add_argument("--project", help="Project key (defaults to config.yaml projects.default or JIRA_PROJECT_KEY)")
+    create.add_argument("--type", dest="issue_type", default="Bug", help="Issue type name (default: Bug)")
+    create_body_group = create.add_mutually_exclusive_group()
+    create_body_group.add_argument("--body", dest="body_text", metavar="TEXT",
+                                   help="Inline markdown text for the issue description")
+    create_body_group.add_argument("--file", dest="markdown_file", metavar="FILE",
+                                   help="Markdown file whose content becomes the issue description")
+    create.add_argument("--label", dest="labels", action="append", help="Label to add (repeatable)")
+    create.add_argument("--dry-run", action="store_true")
+    create.add_argument("--json", action="store_true", help="Emit JSON output")
+
+    update = subparsers.add_parser("update", help="Update native fields (summary/description/labels) on a Jira issue")
+    update.add_argument("issue_key")
+    update.add_argument("--summary", help="New summary/title")
+    update_body_group = update.add_mutually_exclusive_group()
+    update_body_group.add_argument("--body", dest="body_text", metavar="TEXT",
+                                   help="Inline markdown text to replace the issue description")
+    update_body_group.add_argument("--file", dest="markdown_file", metavar="FILE",
+                                   help="Markdown file whose content replaces the issue description")
+    update.add_argument("--label", dest="labels", action="append", help="Label to set (repeatable; replaces existing labels)")
+    update.add_argument("--dry-run", action="store_true")
+    update.add_argument("--json", action="store_true", help="Emit JSON output")
 
     transition = subparsers.add_parser("transition", help="Transition a Jira issue")
     transition.add_argument("issue_key")
@@ -118,7 +145,27 @@ def _dispatch(args: argparse.Namespace) -> dict[str, Any]:
             business=args.business,
             scope=args.scope,
             qa_notes=args.qa_notes,
+            build_number=args.build_number,
             planning_file=args.file,
+            dry_run=args.dry_run,
+        )
+    if args.command == "create":
+        return service.create(
+            summary=args.summary,
+            project_key=args.project,
+            issue_type=args.issue_type,
+            body_text=args.body_text,
+            markdown_file=args.markdown_file,
+            labels=args.labels,
+            dry_run=args.dry_run,
+        )
+    if args.command == "update":
+        return service.update(
+            args.issue_key,
+            summary=args.summary,
+            body_text=args.body_text,
+            markdown_file=args.markdown_file,
+            labels=args.labels,
             dry_run=args.dry_run,
         )
     if args.command == "transition":

@@ -5,9 +5,9 @@ from typing import Any
 import json
 
 from jira_tool.client import JiraAPIError, JiraClient
-from jira_tool.comments import load_comment_body, post_comment
+from jira_tool.comments import load_comment_body, markdown_to_adf, post_comment
 from jira_tool.fields import build_issue_fields_payload
-from jira_tool.issues import get_issue, search_issues, update_issue
+from jira_tool.issues import create_issue, get_issue, search_issues, update_issue
 from jira_tool.models import AppConfig
 from jira_tool.planning import normalize_planning_data
 from jira_tool.transitions import (
@@ -80,6 +80,7 @@ class JiraService:
         business: str | None = None,
         scope: str | None = None,
         qa_notes: str | None = None,
+        build_number: float | int | str | None = None,
         planning_file: str | None = None,
         raw_planning: dict[str, Any] | None = None,
         dry_run: bool = False,
@@ -90,6 +91,7 @@ class JiraService:
             business=business,
             scope=scope,
             qa_notes=qa_notes,
+            build_number=build_number,
             raw=raw_planning or file_planning,
         )
         payload = build_issue_fields_payload(self.config.fields, planning)
@@ -101,6 +103,93 @@ class JiraService:
             "updated_fields": sorted(planning.keys()),
             "dry_run": dry_run,
             "fields_payload": payload,
+        }
+
+    def create(
+        self,
+        *,
+        summary: str,
+        project_key: str | None = None,
+        issue_type: str = "Bug",
+        body_text: str | None = None,
+        markdown_file: str | None = None,
+        labels: list[str] | None = None,
+        dry_run: bool = False,
+    ) -> dict[str, Any]:
+        if not summary:
+            raise ValueError("--summary is required")
+
+        resolved_project = (
+            project_key
+            or self.config.projects.get("default")
+            or self.client.credentials.project_key
+        )
+        if not resolved_project:
+            raise ValueError(
+                "Project key is required: pass --project, or set projects.default in "
+                "config.yaml, or set JIRA_PROJECT_KEY"
+            )
+
+        fields_payload: dict[str, Any] = {
+            "project": {"key": resolved_project},
+            "issuetype": {"name": issue_type},
+            "summary": summary,
+        }
+        if body_text is not None or markdown_file is not None:
+            description_md = (
+                body_text if body_text is not None else Path(markdown_file).read_text(encoding="utf-8")
+            )
+            fields_payload["description"] = markdown_to_adf(description_md)
+        if labels:
+            fields_payload["labels"] = labels
+
+        issue_key = None
+        if not dry_run:
+            result = create_issue(self.client, fields_payload)
+            issue_key = result.get("key")
+
+        return {
+            "status": "ok",
+            "issue_key": issue_key,
+            "project_key": resolved_project,
+            "issue_type": issue_type,
+            "dry_run": dry_run,
+            "fields_payload": fields_payload,
+        }
+
+    def update(
+        self,
+        issue_key: str,
+        *,
+        summary: str | None = None,
+        body_text: str | None = None,
+        markdown_file: str | None = None,
+        labels: list[str] | None = None,
+        dry_run: bool = False,
+    ) -> dict[str, Any]:
+        fields_payload: dict[str, Any] = {}
+        if summary is not None:
+            fields_payload["summary"] = summary
+        if body_text is not None or markdown_file is not None:
+            description_md = (
+                body_text if body_text is not None else Path(markdown_file).read_text(encoding="utf-8")
+            )
+            fields_payload["description"] = markdown_to_adf(description_md)
+        if labels is not None:
+            fields_payload["labels"] = labels
+
+        if not fields_payload:
+            raise ValueError("Provide at least one of --summary, --body/--file, or --label")
+
+        if not dry_run:
+            update_issue(self.client, issue_key, fields_payload)
+
+        return {
+            "status": "ok",
+            "issue_key": issue_key,
+            "updated_fields": sorted(fields_payload.keys()),
+            "dry_run": dry_run,
+            "fields_payload": fields_payload,
         }
 
     def transition(self, issue_key: str, target_state: str, *, dry_run: bool = False) -> dict[str, Any]:

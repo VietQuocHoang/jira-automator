@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 
-PLANNING_KEYS = ("acceptance_criteria", "business", "scope", "qa_notes")
+PLANNING_KEYS = ("acceptance_criteria", "business", "scope", "qa_notes", "build_number")
 
 
 def build_issue_fields_payload(

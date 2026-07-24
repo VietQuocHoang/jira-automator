@@ -6,6 +6,7 @@ fields:
   business: customfield_10042
   scope: customfield_10043
   qa_notes: customfield_10044
+  build_number: customfield_10045
 
 transitions:
   planned: Planned

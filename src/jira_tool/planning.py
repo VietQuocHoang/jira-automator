@@ -9,6 +9,7 @@ def normalize_planning_data(
     business: str | None = None,
     scope: str | None = None,
     qa_notes: str | None = None,
+    build_number: float | int | str | None = None,
     raw: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     planning = dict(raw or {})
@@ -17,6 +18,7 @@ def normalize_planning_data(
         "business": business,
         "scope": scope,
         "qa_notes": qa_notes,
+        "build_number": build_number,
     }
     for key, value in overrides.items():
         if value is not None:

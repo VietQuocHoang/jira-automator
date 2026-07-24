@@ -70,6 +70,24 @@ jira-tool --profile company-a pull --query planning_queue --json
 jira-tool pull --jql 'project = ABC AND sprint in openSprints()' --json
 ```
 
+Create an issue:
+
+```bash
+jira-tool create --summary "Login button unresponsive on Safari" --type Bug --body "Steps to reproduce:\n1. ...\n2. ..." --json
+jira-tool --profile company-a create --summary "Login button unresponsive on Safari" --type Bug --file bug.md --label frontend --json
+```
+
+`--project` defaults to `projects.default` in the active `config.yaml`, falling back to `JIRA_PROJECT_KEY`. `--type` defaults to `Bug`. `--body`/`--file` are optional and mutually exclusive; `--label` may be repeated.
+
+Update native fields (summary/description/labels) on an existing issue:
+
+```bash
+jira-tool update ABC-123 --body "Updated description text" --json
+jira-tool --profile company-a update ABC-123 --summary "New title" --file description.md --label backend --json
+```
+
+`--label` replaces the full label set (not additive). At least one of `--summary`, `--body`/`--file`, `--label` is required.
+
 Fetch one issue:
 
 ```bash
@@ -85,6 +103,7 @@ jira-tool fill ABC-123 \
   --business "Reduce loss of work during interruptions" \
   --scope "Draft save and resume flow" \
   --qa-notes "Verify save, reload, and draft overwrite behavior" \
+  --build-number 877 \
   --json
 
 jira-tool --profile company-a fill ABC-123 \
@@ -92,8 +111,11 @@ jira-tool --profile company-a fill ABC-123 \
   --business "Reduce loss of work during interruptions" \
   --scope "Draft save and resume flow" \
   --qa-notes "Verify save, reload, and draft overwrite behavior" \
+  --build-number 877 \
   --json
 ```
+
+`--build-number` sets the numeric build/MR/PR-number field (mapped via `fields.build_number` in `config.yaml`) — handy for recording the PR number that will be reviewed for a ticket in code review.
 
 Or from a JSON file:
 
@@ -102,7 +124,8 @@ Or from a JSON file:
   "acceptance_criteria": "User can save a draft",
   "business": "Reduce loss of work during interruptions",
   "scope": "Draft save and resume flow",
-  "qa_notes": "Verify save, reload, and draft overwrite behavior"
+  "qa_notes": "Verify save, reload, and draft overwrite behavior",
+  "build_number": 877
 }
 ```
 
